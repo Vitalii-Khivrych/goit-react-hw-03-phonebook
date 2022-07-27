@@ -58,18 +58,36 @@ export class App extends Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { contacts } = this.state;
+
+    if (prevState.contacts !== contacts) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
+    }
+  }
+
   render() {
-    const { filter } = this.state;
+    const { filter, contacts } = this.state;
     const filterArray = this.renderForFilter();
 
     return (
       <>
         <h1>Phonebook</h1>
         <ContactForm onSubmit={this.addContact} />
+        {contacts.length > 0 && (
+          <>
+            <h2>Contacts</h2>
 
-        <h2>Contacts</h2>
-        <Filter value={filter} onChange={this.onChangeFilter} />
-        <ContactList data={filterArray} onDeleteContact={this.deleteContact} />
+            {contacts.length > 1 && (
+              <Filter value={filter} onChange={this.onChangeFilter} />
+            )}
+
+            <ContactList
+              data={filterArray}
+              onDeleteContact={this.deleteContact}
+            />
+          </>
+        )}
       </>
     );
   }
