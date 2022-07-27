@@ -1,0 +1,76 @@
+import React, { Component } from 'react';
+import { nanoid } from 'nanoid';
+import { ContactForm } from './ContactForm/ContactForm';
+import { Filter } from './Filter/Filter';
+import { ContactList } from './ContactList/ContactList';
+import initialContacts from './data/cantacts.json';
+
+const LOCAL_STORAGE_KEY = 'contacts';
+
+export class App extends Component {
+  state = {
+    contacts: initialContacts,
+    filter: '',
+  };
+
+  addContact = ({ name, number }) => {
+    const { contacts } = this.state;
+    const isFindCopyContact = contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (isFindCopyContact) {
+      alert(`${name} is already in contacts`);
+      return;
+    }
+
+    const newContact = { id: nanoid(), name, number };
+
+    this.setState(({ contacts }) => ({
+      contacts: [newContact, ...contacts],
+    }));
+  };
+
+  deleteContact = contactId => {
+    this.setState(({ contacts }) => ({
+      contacts: contacts.filter(({ id }) => id !== contactId),
+    }));
+  };
+
+  onChangeFilter = evt => {
+    this.setState({ filter: evt.target.value });
+  };
+
+  renderForFilter() {
+    const { contacts, filter } = this.state;
+    const filterContacts = contacts.filter(({ name }) =>
+      name.toLowerCase().includes(filter.toLowerCase())
+    );
+    return filterContacts;
+  }
+
+  componentDidMount() {
+    const contactslocaolStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parseContactslocaolStorage = JSON.parse(contactslocaolStorage);
+
+    if (parseContactslocaolStorage) {
+      this.setState({ contacts: parseContactslocaolStorage });
+    }
+  }
+
+  render() {
+    const { filter } = this.state;
+    const filterArray = this.renderForFilter();
+
+    return (
+      <>
+        <h1>Phonebook</h1>
+        <ContactForm onSubmit={this.addContact} />
+
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.onChangeFilter} />
+        <ContactList data={filterArray} onDeleteContact={this.deleteContact} />
+      </>
+    );
+  }
+}
