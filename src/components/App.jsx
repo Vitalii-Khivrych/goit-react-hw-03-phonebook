@@ -13,6 +13,23 @@ export class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const contactslocaolStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parseContactslocaolStorage = JSON.parse(contactslocaolStorage);
+
+    if (parseContactslocaolStorage) {
+      this.setState({ contacts: parseContactslocaolStorage });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { contacts } = this.state;
+
+    if (prevState.contacts !== contacts) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
+    }
+  }
+
   addContact = ({ name, number }) => {
     const { contacts } = this.state;
     const isFindCopyContact = contacts.find(
@@ -49,23 +66,6 @@ export class App extends Component {
     return filterContacts;
   }
 
-  componentDidMount() {
-    const contactslocaolStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const parseContactslocaolStorage = JSON.parse(contactslocaolStorage);
-
-    if (parseContactslocaolStorage) {
-      this.setState({ contacts: parseContactslocaolStorage });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-
-    if (prevState.contacts !== contacts) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
-    }
-  }
-
   render() {
     const { filter, contacts } = this.state;
     const filterArray = this.renderForFilter();
@@ -74,20 +74,11 @@ export class App extends Component {
       <>
         <h1>Phonebook</h1>
         <ContactForm onSubmit={this.addContact} />
-        {contacts.length > 0 && (
-          <>
-            <h2>Contacts</h2>
-
-            {contacts.length > 1 && (
-              <Filter value={filter} onChange={this.onChangeFilter} />
-            )}
-
-            <ContactList
-              data={filterArray}
-              onDeleteContact={this.deleteContact}
-            />
-          </>
+        {contacts.length > 0 && <h2>Contacts</h2>}
+        {contacts.length > 1 && (
+          <Filter value={filter} onChange={this.onChangeFilter} />
         )}
+        <ContactList data={filterArray} onDeleteContact={this.deleteContact} />
       </>
     );
   }
